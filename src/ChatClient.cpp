@@ -1,6 +1,10 @@
 #include <botcraft/Utilities/Logger.hpp>
 #include "botcraft-worker/ChatClient.hpp"
 
+#ifndef BOTCRAFT_WORKER_FLATTEN_PLAYERCHAT
+#define BOTCRAFT_WORKER_FLATTEN_PLAYERCHAT true
+#endif
+
 ChatClient::ChatClient(const int8_t id, std::string addr, std::string user, bool const isOnline) : alive(false),
     id(id),
     address(std::move(addr)),
@@ -44,9 +48,17 @@ void ChatClient::Handle(ProtocolCraft::ClientboundSystemChatPacket &msg) {
 }
 
 void ChatClient::Handle(ProtocolCraft::ClientboundPlayerChatPacket &msg) {
-    auto uc = msg.GetUnsignedContent();
-    if (!uc || uc->GetText().empty()) return;
-    tx.push(SocketPacket_MakeChatPacket(id, uc->GetText()));
+    if constexpr (BOTCRAFT_WORKER_FLATTEN_PLAYERCHAT) {
+        std::string uc = msg.GetBody().GetContent();
+        if (uc.empty()) return;
+        const std::string userName = this->GetPlayerName(msg.GetSender());
+        uc = "<" + userName + "> " + uc;
+        tx.push(SocketPacket_MakeChatPacket(id, uc));
+    } else {
+        const std::string uc = msg.GetBody().GetContent();
+        if (uc.empty()) return;
+        tx.push(SocketPacket_MakePlayerChatPacket(id, msg.GetSender(), uc));
+    }
 }
 
 void ChatClient::Handle(ProtocolCraft::ClientboundDisguisedChatPacket &msg) {

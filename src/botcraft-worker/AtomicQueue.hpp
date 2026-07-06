@@ -10,6 +10,7 @@
 template<typename T>
 class AtomicQueue {
     static constexpr int MAX_QUEUE_SIZE = BOTCRAFT_WORKER_MAX_QUEUE;
+    static constexpr int MAX_UNCOMMIT = 100;
 public:
     void push(const T &value) {
         if constexpr (MAX_QUEUE_SIZE > 0) if (size() >= MAX_QUEUE_SIZE) pop();
@@ -49,14 +50,17 @@ public:
 private:
     std::queue<T*> queue;
     mutable std::mutex mutex;
+    bool dirty;
 
     void internal_pop() {
         if (queue.empty()) return;
+        if (queue.size() >= MAX_UNCOMMIT) dirty = true;
         delete queue.front();
         queue.pop();
-        if (queue.empty()) {
+        if (dirty && queue.empty()) {
             std::queue<T*>().swap(queue);
             malloc_trim(0);
+            dirty = false;
         }
     }
 };

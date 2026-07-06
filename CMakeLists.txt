@@ -19,6 +19,10 @@ if (NOT BOTCRAFT_WORKER_MAX_QUEUE)
     set(BOTCRAFT_WORKER_MAX_QUEUE 0 CACHE INTERNAL "")
 endif ()
 
+if (NOT BOTCRAFT_WORKER_FLATTEN_PLAYERCHAT)
+    set(BOTCRAFT_WORKER_FLATTEN_PLAYERCHAT true CACHE INTERNAL "")
+endif ()
+
 include(FetchContent)
 FetchContent_Declare(
         Botcraft

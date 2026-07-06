@@ -7,6 +7,7 @@
 #define SOCKET_PACKET_TYPE_INFO         1
 #define SOCKET_PACKET_TYPE_STOP         2
 #define SOCKET_PACKET_TYPE_DISCONNECT   3
+#define SOCKET_PACKET_TYPE_PCHAT        4
 
 #include <functional>
 #include <vector>
@@ -34,3 +35,5 @@ static std::array<PacketHandler, 4> PacketConsumeHandlers = {
 SocketPacket SocketPacket_MakeChatPacket(int8_t botId, const std::string &msg);
 
 SocketPacket SocketPacket_MakeInfoPacket(const std::vector<std::string> &bots);
+
+SocketPacket SocketPacket_MakePlayerChatPacket(const int8_t botId, std::array<unsigned char, SOCKET_PACKET_PAYLOAD_USIZE> uuid, const std::string &msg);
