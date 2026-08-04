@@ -20,6 +20,7 @@ std::atomic_bool worker_running(true);
 
 int main() {
     std::signal(SIGINT, signalHandler);
+    std::signal(SIGTERM, signalHandler);
 
     Botcraft::Logger::GetInstance().SetLogLevel(Botcraft::LogLevel::Info);
     Botcraft::Logger::GetInstance().SetFilename("");
