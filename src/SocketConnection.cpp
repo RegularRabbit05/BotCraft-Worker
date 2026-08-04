@@ -34,7 +34,10 @@ void SocketConnection::Connect() {
         close(fd);
         alive = false;
         LOG_ERROR("Socket connection failed");
+        return;
     }
+
+    InjectIncomingPacket(SocketPacket_MakeInfoPacket({}));
 }
 
 void SocketConnection::Disconnect() {
@@ -71,6 +74,14 @@ bool SocketConnection::ProcessIncomingPackets() {
         return false;
     }
 
+    if (avail == 0) {
+        char probe;
+        if (recv(fd, &probe, 1, MSG_PEEK | MSG_DONTWAIT) == 0) {
+            Disconnect();
+            return false;
+        }
+    }
+
     avail -= avail % static_cast<int>(sizeof(SocketPacket));
     for (int i = 0; i < avail / sizeof(SocketPacket); i++) {
         SocketPacket packet;
@@ -86,7 +97,7 @@ bool SocketConnection::ProcessIncomingPackets() {
 }
 
 bool SocketConnection::ProcessSinglePacket(const SocketPacket &packet) {
-    if (send(fd, &packet, sizeof(packet), 0) != sizeof(packet)) {
+    if (send(fd, &packet, sizeof(packet), MSG_NOSIGNAL) != sizeof(packet)) {
         LOG_ERROR("Failed to send whole packet to socket, reconnecting");
         Disconnect();
         return false;

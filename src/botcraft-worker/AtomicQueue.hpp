@@ -50,7 +50,7 @@ public:
 private:
     std::queue<T*> queue;
     mutable std::mutex mutex;
-    bool dirty;
+    bool dirty = false;
 
     void internal_pop() {
         if (queue.empty()) return;

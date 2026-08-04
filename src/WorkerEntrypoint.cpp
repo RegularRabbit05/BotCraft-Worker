@@ -50,7 +50,6 @@ int main() {
 
         std::vector<ChatClient *> clients;
         auto *connection = new SocketConnection(socketPath);
-        connection->InjectIncomingPacket(SocketPacket_MakeInfoPacket({}));
 
         {
             int botIdCounter = 1;
