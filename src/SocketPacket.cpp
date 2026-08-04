@@ -70,7 +70,8 @@ void PacketConsume_Chat(void *c, void *p) {
     auto str = static_cast<char *>(alloca(packet->length + 1));
     strncpy(str, reinterpret_cast<char *>(packet->payload), packet->length);
     str[packet->length] = '\0';
-    client->SendChatMessage(str);
+    if (str[0] == '/') client->SendChatCommand(str + 1);
+    else client->SendChatMessage(str);
 }
 
 void PacketConsume_Disconnect(void *c, void *) {
